@@ -9,7 +9,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import imageSvg from '~/assets/svg';
 import useDebounce from '../../hooks/useDebounce';
 import axios from 'axios';
-import { dispatchCreateGroup } from '../../redux/actions/chatActions';
+import { dispatchCreateGroup, dispatchGetGroup } from '../../redux/actions/groupActions';
+import Loading from '../Loading';
+import { createAxios } from '../../utils/api';
 
 const cx = classNames.bind(styles);
 
@@ -20,7 +22,7 @@ const initState = {
 };
 
 function FormModal({ onClose }) {
-    const token = useSelector((state) => state.token);
+    let axiosJWT = createAxios();
 
     const [inputValue, setInputValue] = useState(initState);
     const { name, description, search } = inputValue;
@@ -29,6 +31,7 @@ function FormModal({ onClose }) {
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [showResult, setShowResult] = useState(true);
     const [loading, setLoading] = useState(false);
+    const [loadingSearch, setLoadingSearch] = useState(false);
     const [error, setError] = useState(false);
     const dispatch = useDispatch();
 
@@ -36,26 +39,23 @@ function FormModal({ onClose }) {
 
     const fetchApi = async () => {
         try {
-            setLoading(true);
-            const { data } = await axios.get(`/users?search=${debounced}`, {
-                headers: { token: `Bearer ${token}` },
-            });
+            setLoadingSearch(true);
+            const { data } = await axiosJWT.get(`/users?search=${debounced}`);
             setSearchResult(data.users);
-            setLoading(false);
+            setLoadingSearch(false);
         } catch (error) {
-            setLoading(true);
+            setLoadingSearch(true);
             console.log(error);
         }
     };
 
-    
     useEffect(() => {
         if (!debounced.trim()) {
             setSearchResult([]);
             return;
         }
 
-        setLoading(true);
+        setLoadingSearch(true);
 
         fetchApi();
     }, [debounced]);
@@ -74,7 +74,9 @@ function FormModal({ onClose }) {
     };
 
     const handleGroup = (result) => {
-        setSelectedUsers([...selectedUsers, result]);
+        if (!selectedUsers.some((user) => user._id === result._id)) {
+            setSelectedUsers([...selectedUsers, result]);
+        }
     };
 
     const handleDelete = (delUser) => {
@@ -89,27 +91,25 @@ function FormModal({ onClose }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!selectedUsers || !name || !description) {
+        if (!selectedUsers || selectedUsers.length < 2 || !name || !description) {
             setError(true);
         } else {
-            try {
-                const res = await axios.post(
-                    '/chat/create',
-                    {
+            setLoading(true);
+            setTimeout(async () => {
+                try {
+                    const res = await axiosJWT.post('/group/create', {
                         name: name,
                         description: description,
                         users: JSON.stringify(selectedUsers.map((user) => user._id)),
-                    },
-                    {
-                        headers: { token: `Bearer ${token}` },
-                    },
-                );
+                    });
 
-                dispatch(dispatchCreateGroup({ ...res.data }));
-                onClose();
-            } catch (error) {
-                console.log(error);
-            }
+                    dispatch(dispatchCreateGroup({ ...res.data }));
+                    onClose();
+                } catch (error) {
+                    console.log(error);
+                }
+                setLoading(false);
+            }, 1500);
         }
     };
 
@@ -142,7 +142,7 @@ function FormModal({ onClose }) {
                                 <ul>
                                     {searchResult.map((result) => {
                                         return (
-                                            <li onClick={() => handleGroup(result)}>
+                                            <li onClick={() => handleGroup(result)} key={result._id}>
                                                 <img src={result.image} alt="" />
                                                 <p>{result.name}</p>
                                             </li>
@@ -154,11 +154,15 @@ function FormModal({ onClose }) {
                     )}
                     onClickOutside={handleHideResult}
                 >
-                    <div className={cx('add')}>
-                        <div className={cx('box')}>
+                    <div className={cx('add', error && 'input-error')}>
+                        <div className={cx('box', !selectedUsers.length && 'box-none')}>
                             {selectedUsers.map((user) => {
                                 return (
-                                    <button className={cx('box-item')} onClick={() => handleDelete(user)}>
+                                    <button
+                                        className={cx('box-item')}
+                                        key={user._id}
+                                        onClick={() => handleDelete(user)}
+                                    >
                                         <p>{user.name}</p>
                                         <img src={imageSvg.close} alt="" className={cx('icon-close')} />
                                     </button>
@@ -169,15 +173,20 @@ function FormModal({ onClose }) {
                             type="text"
                             placeholder="Add Members"
                             value={search}
-                            className={cx('input', 'input-search', error && selectedUsers.length < 2 && 'input-error')}
+                            className={cx('input', 'input-search')}
                             name="search"
                             onChange={handleChangeInput}
                             onFocus={handleFocus}
                         />
-                        {loading ? <FaSpinner className={cx('loading')} /> : <AiOutlineSearch className={cx('icon')} />}
+                        {loadingSearch ? (
+                            <FaSpinner className={cx('-icon')} />
+                        ) : (
+                            <AiOutlineSearch className={cx('icon')} />
+                        )}
                     </div>
                 </Tippy>
             </div>
+            {loading && <Loading className={cx('wrapper-modal')} />}
             <div className={cx('btn')}>
                 <button>Save</button>
             </div>

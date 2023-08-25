@@ -20,11 +20,10 @@ const authController = {
             const accessToken = authController.generateAccessToken(user);
             const refreshToken = authController.generateRefreshToken(user);
 
-            res.cookie('refresh', refreshToken, {
+            res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 path: '/',
-                secure: true,
-                sameSite: 'lax',
+                sameSite: 'strict',
             });
 
             const { ...others } = user._doc;
@@ -38,7 +37,7 @@ const authController = {
                 let err = Object.values(error.errors)
                     .map((val) => val.message)
                     .join();
-                return res.status(500).json({ msg: err });
+                return res.status(500).json({ message: err });
             }
             return res.status(500).json({ msg: error.message });
         }
@@ -73,7 +72,7 @@ const authController = {
                 let err = Object.values(error.errors)
                     .map((val) => val.message)
                     .join();
-                return res.status(500).json({ msg: err });
+                return res.status(500).json({ message: err });
             }
             return res.status(500).json({ msg: error.message });
         }
@@ -85,7 +84,7 @@ const authController = {
                 id: user.id,
             },
             process.env.JWT_ACCESS_KEY,
-            { expiresIn: '60m' },
+            { expiresIn: '3d' },
         );
     },
 
@@ -102,7 +101,7 @@ const authController = {
     // [POST] /auth/refresh
     requestRefreshToken: async (req, res) => {
         try {
-            const refreshToken = req.cookies.refresh;
+            const refreshToken = req.cookies.refreshToken;
 
             if (!refreshToken) {
                 return res.status(400).json({ message: 'Please login now!' });
@@ -114,13 +113,6 @@ const authController = {
                 }
 
                 const newAccessToken = authController.generateAccessToken(user);
-                const newRefreshToken = authController.generateRefreshToken(user);
-
-                res.cookie('refreshToken', newRefreshToken, {
-                    httpOnly: true,
-                    path: '/',
-                    sameSite: 'strict',
-                });
 
                 res.status(200).json({ accessToken: newAccessToken });
             });

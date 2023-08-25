@@ -32,7 +32,7 @@ function RegisterPage() {
         e.preventDefault();
         try {
             const res = await axios.post(
-                'http://localhost:5000/auth/register',
+                '/auth/register',
                 {
                     email,
                     password,
@@ -43,10 +43,12 @@ function RegisterPage() {
             setUser({ ...user, err: '', success: res.data.message });
             navigate('/login');
         } catch (err) {
-            console.log(err);
+            console.log(err.response.data.msg);
             err.response.data.message && setUser({ ...user, err: err.response.data.message, success: '' });
         }
     };
+
+    console.log('error: ', err)
 
     return (
         <div className={cx('wrapper')}>

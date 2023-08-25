@@ -2,24 +2,14 @@ const User = require('../models/users');
 const bcrypt = require('bcrypt');
 
 const usersService = {
-    findAll: (keyword, user) => {
+    findUserByKeyword: (keyword, user) => {
         return new Promise(async (resolve, reject) => {
             try {
-                let users = await User.find(keyword)
-                    .find({ _id: { $ne: user } })
-                    .limit(5);
+                let users = await User.find(keyword).find({ _id: { $ne: user } });
 
                 resolve({
                     users: users,
                 });
-            } catch (e) {
-                reject(e);
-            }
-        });
-    },
-    findUserByKeyword: () => {
-        return new Promise(async (resolve, reject) => {
-            try {
             } catch (e) {
                 reject(e);
             }
@@ -31,7 +21,7 @@ const usersService = {
                 const user = await User.findById(id);
 
                 if (!user) {
-                    return res.status(400).json({
+                    resolve({
                         message: 'User not found',
                     });
                 }

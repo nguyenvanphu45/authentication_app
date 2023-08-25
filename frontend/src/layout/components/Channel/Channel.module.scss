@@ -4,23 +4,23 @@
     width: 324px;
     padding: 25px 33px;
 
+    .name {
+        margin-bottom: 18px;
+    }
+
     h3 {
         color: $text-color-3;
         font-size: 18px;
         font-weight: 700;
         text-transform: uppercase;
-        margin-bottom: 18px;
-
-        &:last-child {
-            margin-bottom: 25px;
-        }
+        margin-bottom: 25px;
     }
 
     p {
         color: $text-color-3;
         font-size: 18px;
         font-weight: 400;
-        margin-bottom: 43px;
+        margin-bottom: 44px;
     }
 
     .member {
@@ -45,6 +45,5 @@
                 font-weight: 700;
             }
         }
-
     }
 }

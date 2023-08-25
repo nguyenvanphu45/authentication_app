@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styles from './Header.module.scss';
 import classNames from 'classnames/bind';
 import imageSvg from '~/assets/svg';
@@ -6,26 +6,27 @@ import { FaUserCircle } from 'react-icons/fa';
 import { BiUser, BiSolidGroup } from 'react-icons/bi';
 import { BsCaretDownFill } from 'react-icons/bs';
 import { TbLogout } from 'react-icons/tb';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Menu from '../../../components/Popper/Menu';
 import { dispatchLogoutUser } from '../../../redux/actions/authActions';
-import { createAxios } from '../../../utils/createInstance';
+import { createAxios } from '../../../utils/api';
 
 const cx = classNames.bind(styles);
 
 function Header() {
     const auth = useSelector((state) => state.auth);
-    const token = useSelector((state) => state.token);
     const { user, isLogged } = auth;
     const dispatch = useDispatch();
-    let axiosJWT = createAxios(user, token, dispatch, dispatchLogoutUser);
+    const navigate = useNavigate();
+    let axiosJWT = createAxios(user, dispatch, dispatchLogoutUser);
 
     const logout = async () => {
         try {
-            await axiosJWT.post('http://localhost:5000/auth/logout', user._id, {
-                headers: { token: `Bearer ${token}` },
+            await axiosJWT.post('/auth/logout', user._id, {
+                withCredentials: true,
             });
+            localStorage.removeItem('token');
             dispatch(dispatchLogoutUser());
         } catch (error) {
             console.log(error);
@@ -50,6 +51,12 @@ function Header() {
             onClick: logout,
         },
     ];
+
+    useEffect(() => {
+        if (!isLogged) {
+            navigate('/login');
+        }
+    }, [isLogged]);
 
     return (
         <div className={cx('header')}>

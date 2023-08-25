@@ -9,8 +9,9 @@
 body {
     font-family: $font-family;
     text-rendering: optimizeSpeed;
-    overflow-x: hidden;
+    // overflow: hidden;
     color: $text-color;
+    height: 100vh;
 }
 
 button {
@@ -35,4 +36,12 @@ input, textarea {
     resize: none;
     outline: none;
     border: none;
+}
+
+img {
+    object-fit: cover;
+}
+
+::-webkit-scrollbar {
+    display: none;
 }

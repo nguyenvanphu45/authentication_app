@@ -19,7 +19,10 @@ const userSchema = new mongoose.Schema(
             type: String,
             minlength: [6, 'Password at least 6 characters!'],
             required: [true, 'Please fill in all fields!'],
-            match: [regexPassword, 'Email or Password incorrect!'],
+            match: [
+                regexPassword,
+                'Password contain at least one uppercase letter, one lowercase letter, and one number!',
+            ],
         },
         name: {
             type: String,
@@ -37,7 +40,7 @@ const userSchema = new mongoose.Schema(
         },
         image: {
             type: String,
-            default: ({email}) => {
+            default: ({ email }) => {
                 const canvas = createCanvas(100, 100);
                 const firstChar = email[0].toUpperCase();
                 const ctx = canvas.getContext('2d');

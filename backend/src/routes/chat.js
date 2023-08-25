@@ -4,7 +4,7 @@ const router = express.Router();
 
 const chatController = require('../app/controllers/chat.controller');
 
-router.get('/', middleware.verifyToken, chatController.fetchChat);
-router.post('/create', middleware.verifyToken, chatController.create);
+router.post('/', middleware.verifyToken, chatController.sendMessage);
+router.get('/:groupId', middleware.verifyToken, chatController.allChat);
 
 module.exports = router;

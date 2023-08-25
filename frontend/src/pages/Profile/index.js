@@ -2,35 +2,26 @@ import React, { useEffect } from 'react';
 import styles from './Profile.module.scss';
 import classNames from 'classnames/bind';
 import FrameInfo from '../../components/FrameInfo';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { dispatchGetUser, fetchUser } from '../../redux/actions/authActions';
-import { createAxios } from '../../utils/createInstance';
+import { createAxios } from '../../utils/api';
 import noImage from '~/assets/image/no-image.png';
 
 const cx = classNames.bind(styles);
 
 function ProfilePage() {
-    const auth = useSelector((state) => state.auth);
-    const token = useSelector((state) => state.token);
-    const { user, isLogged } = auth;
+    const user = useSelector((state) => state.auth.user);
     const dispatch = useDispatch();
-    const navigate = useNavigate();
-    let axiosJWT = createAxios(user, token, dispatch, dispatchGetUser);
+    let axiosJWT = createAxios(user, dispatch, dispatchGetUser);
 
     useEffect(() => {
-        if (!isLogged) {
-            navigate('/login');
-        }
-
-        if (token) {
-            const getUser = () => {
-                return fetchUser(user._id, token, axiosJWT).then((res) => {
-                    dispatch(dispatchGetUser({ ...res.data.user }));
-                });
-            };
-            getUser();
-        }
+        const getUser = () => {
+            return fetchUser(user._id, axiosJWT).then((res) => {
+                dispatch(dispatchGetUser({ ...res.data.user }));
+            });
+        };
+        getUser();
     }, []);
 
     return (
@@ -46,7 +37,9 @@ function ProfilePage() {
                         <p>Some info may be visible to other people</p>
                     </div>
                     <button className={cx('frame-header__btn')}>
-                        <Link to={`/edit/${user._id}`}>Edit</Link>
+                        <Link to={`/edit/${user._id}`} className={cx('edit')}>
+                            Edit
+                        </Link>
                     </button>
                 </div>
                 <div className={cx('frame-body')}>

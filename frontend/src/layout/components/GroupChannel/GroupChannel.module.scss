@@ -2,6 +2,7 @@
 
 .search {
     margin: 19px 25px 0 33px;
+    height: calc(100% - 62px);
 
     &-input {
         position: relative;
@@ -36,6 +37,8 @@
         display: flex;
         flex-direction: column;
         gap: 21px;
+        height: calc(100% - 102px);
+        overflow: scroll;
 
         .list-item {
             display: flex;
@@ -54,7 +57,6 @@
                 color: $text-color-4;
                 font-size: 18px;
                 font-weight: 700;
-                text-transform: uppercase;
             }
         }
     }

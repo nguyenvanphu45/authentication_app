@@ -8,13 +8,13 @@ function Channel({ chat }) {
 
     return (
         <div className={cx('container')}>
-            <h3>{chat.name}</h3>
+            <h3 className={cx('name')}>{chat.name}</h3>
             <p>{chat.description}</p>
             <h3>Members</h3>
             <div className={cx('member')}>
                 {chat.users.map((user) => {
                     return (
-                        <div className={cx('member-item')}>
+                        <div className={cx('member-item')} key={user._id}>
                             <img src={user.image} alt="" />
                             <h4>{user.name}</h4>
                         </div>

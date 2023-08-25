@@ -35,21 +35,19 @@ function LoginPage() {
         e.preventDefault();
         try {
             const res = await axios.post(
-                'http://localhost:5000/auth/login',
+                '/auth/login',
                 {
                     email,
                     password,
                 },
-                { withCredentials: true },
+                { withCredentials: true, credentials: 'same-origin' },
             );
-
-            console.log(res);
 
             setUser({ ...user, error: '', success: res.data.message });
 
             dispatch(dispatchLogin({ ...res.data.user }));
-            dispatch({ type: 'GET_TOKEN', payload: res.data.user.accessToken });
-            navigate('/');
+            localStorage.setItem('token', res.data.user.accessToken);
+            navigate('/chat');
         } catch (err) {
             console.log(err);
             err.response.data.message && setUser({ ...user, err: err.response.data.message, success: '' });

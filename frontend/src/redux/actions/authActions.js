@@ -7,10 +7,8 @@ export const dispatchLogin = (user) => {
     };
 };
 
-export const fetchUser = async (id, token, axiosJWT) => {
-    const res = await axiosJWT.get('http://localhost:5000/users/' + id, {
-        headers: { token: `Bearer ` + token },
-    });
+export const fetchUser = async (id, axiosJWT) => {
+    const res = await axiosJWT.get('http://localhost:5000/users/' + id);
 
     return res;
 };
